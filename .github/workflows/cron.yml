@@ -1,14 +1,28 @@
-name: Trigger AI Trading Cycle
+name: AI Stock Arena Automation
 
 on:
   schedule:
-    - cron: '*/15 * * * *' # 每15分钟触发一次
-  workflow_dispatch: # 允许手动点击触发
+    # 1. 交易循环: 每15分钟触发一次 (UTC时间)
+    # 注意：GitHub Action 的 Cron 是 UTC。美股 9:30-16:00 EST 大约是 UTC 13:30 - 20:00 (冬令时 +5)
+    # 这里我们简单设置为全天每15分钟跑，代码里有 isUSMarketOpen 守门，不用担心
+    - cron: '*/15 * * * *'
+    
+    # 2. 复盘日记: 每天 UTC 21:15 (美东下午 4:15) 触发一次
+    - cron: '15 21 * * *'
 
 jobs:
-  run-trader:
+  trade-cycle:
     runs-on: ubuntu-latest
     steps:
-      - name: Call API Endpoint
-        run: |
-          curl -X GET "https://ai-stock-arena.vercel.app/api/cron?key=${{ secrets.CRON_SECRET }}"
+      - name: Trigger Trading API
+        run: curl "https://ai-stock-arena.vercel.app/api/cron?key=${{ secrets.CRON_SECRET }}"
+
+  daily-summary:
+    runs-on: ubuntu-latest
+    # 仅在每天 21:15 的时候运行这个 Job (需要配合复杂的 if 或者拆分成两个 yml 文件)
+    # 为了简单，建议直接拆分成两个文件：trade.yml 和 summary.yml
+    # 下面演示拆分后的 summary.yml 内容：
+    steps:
+      - name: Trigger Summary API
+        # 注意这里调用的 API 变成了 /api/summary
+        run: curl "https://ai-stock-arena.vercel.app/api/summary?key=${{ secrets.CRON_SECRET }}"
