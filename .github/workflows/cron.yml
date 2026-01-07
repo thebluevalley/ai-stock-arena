@@ -1,0 +1,14 @@
+name: Trigger AI Trading Cycle
+
+on:
+  schedule:
+    - cron: '*/15 * * * *' # 每15分钟触发一次
+  workflow_dispatch: # 允许手动点击触发
+
+jobs:
+  run-trader:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Call API Endpoint
+        run: |
+          curl -X GET "https://你的_VERCEL_域名.vercel.app/api/cron?key=${{ secrets.CRON_SECRET }}"
