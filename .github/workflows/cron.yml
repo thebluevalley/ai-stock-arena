@@ -11,4 +11,4 @@ jobs:
     steps:
       - name: Call API Endpoint
         run: |
-          curl -X GET "https://你的_VERCEL_域名.vercel.app/api/cron?key=${{ secrets.CRON_SECRET }}"
+          curl -X GET "https://ai-stock-arena.vercel.app/api/cron?key=${{ secrets.CRON_SECRET }}"
