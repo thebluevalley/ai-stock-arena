@@ -1,56 +1,58 @@
 import OpenAI from 'openai';
 
+// --- 角色接口定义 ---
 export interface AgentProfile {
   name: string;
-  provider: string;
+  provider: string; 
   model: string;
   apiKeyEnv: string;
-  role: string;
+  role: string;   
   style: string;
-  avatar: string;
-  rpgStats: { risk: number };
+  avatar: string; 
+  rpgStats: { risk: number }; 
 }
 
-// --- 🏆 选手配置 (名称已修正为与数据库一致) ---
+// --- 🏆 选手配置 (使用 Miniavs 风格：简洁、聚焦头部) ---
 export const AGENTS_CONFIG: AgentProfile[] = [
   { 
-    name: 'Qwen-Coder', // 修正：与数据库一致
+    name: 'Qwen-Coder', 
     provider: 'silicon', 
     model: 'Qwen/Qwen2.5-Coder-32B-Instruct', 
     apiKeyEnv: 'SILICONFLOW_KEY_1',
     role: 'Quantitative Analyst',
     style: 'Technical Analysis, Mean Reversion',
-    avatar: 'https://api.dicebear.com/9.x/notionists/svg?seed=QwenCoder&backgroundColor=e5e7eb',
+    // 使用 miniavs 风格，seed 对应名字，确保每次生成一样但独特的头像
+    avatar: 'https://api.dicebear.com/9.x/miniavs/svg?seed=QwenCoder&backgroundColor=e5e7eb',
     rpgStats: { risk: 30 }
   },
   { 
-    name: 'DeepSeek-V3', // 修正：与数据库一致
+    name: 'DeepSeek-V3', 
     provider: 'silicon', 
     model: 'deepseek-ai/DeepSeek-V3', 
     apiKeyEnv: 'SILICONFLOW_KEY_2',
     role: 'Value Investor',
     style: 'Fundamental Analysis, Long-term Hold',
-    avatar: 'https://api.dicebear.com/9.x/notionists/svg?seed=DeepSeekV3&backgroundColor=ffdfbf',
+    avatar: 'https://api.dicebear.com/9.x/miniavs/svg?seed=DeepSeekV3&backgroundColor=ffdfbf',
     rpgStats: { risk: 20 }
   },
   { 
-    name: 'Doubao-Trader-A', // 修正：与数据库一致
+    name: 'Doubao-Trader-A', 
     provider: 'volcano', 
     model: process.env.VOLCANO_ENDPOINT_ID!,
     apiKeyEnv: 'VOLCANO_API_KEY',
     role: 'Momentum Trader',
     style: 'Trend Following, Breakout Strategy',
-    avatar: 'https://api.dicebear.com/9.x/notionists/svg?seed=DoubaoA&backgroundColor=c0aede',
+    avatar: 'https://api.dicebear.com/9.x/miniavs/svg?seed=DoubaoA&backgroundColor=c0aede',
     rpgStats: { risk: 90 }
   },
   { 
-    name: 'Doubao-Trader-B', // 修正：与数据库一致
+    name: 'Doubao-Trader-B', 
     provider: 'volcano', 
     model: process.env.VOLCANO_ENDPOINT_ID!,
     apiKeyEnv: 'VOLCANO_API_KEY',
     role: 'Short Seller',
     style: 'Shorting Overvalued Stocks, Hedging',
-    avatar: 'https://api.dicebear.com/9.x/notionists/svg?seed=DoubaoB&backgroundColor=b6e3f4',
+    avatar: 'https://api.dicebear.com/9.x/miniavs/svg?seed=DoubaoB&backgroundColor=b6e3f4',
     rpgStats: { risk: 99 }
   }
 ];

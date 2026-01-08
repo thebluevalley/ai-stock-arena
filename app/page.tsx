@@ -1,6 +1,7 @@
 import { supabase } from '@/lib/supabase';
 import { AGENTS_CONFIG } from '@/lib/agents'; 
-import { Terminal, Activity, DollarSign, Briefcase, Zap } from 'lucide-react';
+import { Terminal, Activity, DollarSign, Briefcase } from 'lucide-react';
+import ForceTriggerBtn from '@/components/force-trigger'; // 引入新组件
 
 export const dynamic = 'force-dynamic';
 
@@ -37,15 +38,8 @@ export default async function Home() {
                     <span className="text-emerald-400 font-mono font-bold">● ONLINE</span>
                 </div>
              </div>
-             {/* 手动触发按钮 - 会在新窗口打开 API 链接 */}
-             <a 
-               href={`/api/cron?key=${process.env.CRON_SECRET}&force=true`} 
-               target="_blank"
-               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded transition-colors"
-             >
-               <Zap className="w-3 h-3" />
-               FORCE TRIGGER (TEST)
-             </a>
+             {/* 使用新的交互组件，传入 Secret */}
+             <ForceTriggerBtn secret={process.env.CRON_SECRET || ''} />
           </div>
         </header>
 
@@ -63,16 +57,15 @@ export default async function Home() {
               .map(([sym, qty]) => `${sym}×${qty}`);
 
             return (
-              <div key={p.agent_name} className="bg-[#111] border border-gray-800 rounded-xl p-5 hover:border-gray-600 transition-colors shadow-lg">
+              <div key={p.agent_name} className="bg-[#111] border border-gray-800 rounded-xl p-5 hover:border-gray-600 transition-colors shadow-lg group">
                 <div className="flex justify-between items-start mb-4">
                   <div className="flex items-center gap-3">
-                    {/* 头像显示 */}
-                    <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
-                       {/* 使用 img 标签最稳妥 */}
+                    {/* 简洁头像显示 */}
+                    <div className="w-12 h-12 rounded-full bg-gray-800/50 border border-gray-700 p-1 group-hover:border-gray-500 transition-colors">
                        <img 
-                         src={agentProfile?.avatar || `https://api.dicebear.com/9.x/initials/svg?seed=${p.agent_name}`} 
+                         src={agentProfile?.avatar || `https://api.dicebear.com/9.x/miniavs/svg?seed=${p.agent_name}`} 
                          alt={p.agent_name} 
-                         className="w-full h-full object-cover" 
+                         className="w-full h-full rounded-full" 
                        />
                     </div>
                     <div>
