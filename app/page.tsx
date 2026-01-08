@@ -1,6 +1,6 @@
 import { supabase } from '@/lib/supabase';
 import { AGENTS_CONFIG } from '@/lib/agents'; 
-import { Terminal, Activity, TrendingUp, DollarSign, Briefcase } from 'lucide-react';
+import { Terminal, Activity, DollarSign, Briefcase, Zap } from 'lucide-react';
 
 export const dynamic = 'force-dynamic';
 
@@ -14,7 +14,7 @@ export default async function Home() {
   const logs = logsRes.data || [];
 
   return (
-    <main className="min-h-screen bg-neutral-950 text-gray-200 p-6 font-sans selection:bg-emerald-500/30">
+    <main className="min-h-screen bg-neutral-950 text-gray-200 p-6 font-sans">
       <div className="max-w-7xl mx-auto">
         
         {/* Header */}
@@ -28,28 +28,35 @@ export default async function Home() {
               <p className="text-sm text-gray-500 font-medium">Multi-Agent Algorithmic Trading System</p>
             </div>
           </div>
-          <div className="flex gap-6 text-sm mt-4 md:mt-0">
-             <div className="text-gray-400">
-                <span className="block text-xs text-gray-600 uppercase tracking-wider">Status</span>
-                <span className="text-emerald-400 font-mono font-bold">● LIVE TRADING</span>
+          
+          {/* 右侧：状态与手动触发 */}
+          <div className="flex flex-col items-end gap-3 mt-4 md:mt-0">
+             <div className="flex gap-6 text-sm">
+                <div className="text-gray-400">
+                    <span className="block text-xs text-gray-600 uppercase tracking-wider">Status</span>
+                    <span className="text-emerald-400 font-mono font-bold">● ONLINE</span>
+                </div>
              </div>
-             <div className="text-gray-400">
-                <span className="block text-xs text-gray-600 uppercase tracking-wider">Market</span>
-                <span className="text-white font-mono font-bold">US EQUITIES</span>
-             </div>
+             {/* 手动触发按钮 - 会在新窗口打开 API 链接 */}
+             <a 
+               href={`/api/cron?key=${process.env.CRON_SECRET}&force=true`} 
+               target="_blank"
+               className="flex items-center gap-2 bg-blue-600 hover:bg-blue-500 text-white text-xs font-bold px-4 py-2 rounded transition-colors"
+             >
+               <Zap className="w-3 h-3" />
+               FORCE TRIGGER (TEST)
+             </a>
           </div>
         </header>
 
-        {/* --- 资产仪表盘 (Dashboard Cards) --- */}
+        {/* --- 资产仪表盘 --- */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-12">
           {portfolios.map((p, idx) => {
-            // 匹配配置以获取头像和角色信息
             const agentProfile = AGENTS_CONFIG.find(a => a.name === p.agent_name);
             const profit = p.total_value - 100000;
             const roi = ((profit / 100000) * 100).toFixed(2);
             const isPos = profit >= 0;
 
-            // 处理持仓显示 (过滤掉数量为0的)
             const holdings = p.holdings || {};
             const activeHoldings = Object.entries(holdings)
               .filter(([_, qty]) => Number(qty) > 0)
@@ -61,18 +68,22 @@ export default async function Home() {
                   <div className="flex items-center gap-3">
                     {/* 头像显示 */}
                     <div className="w-10 h-10 rounded-full bg-gray-800 overflow-hidden border border-gray-700">
-                       <img src={agentProfile?.avatar} alt={p.agent_name} className="w-full h-full object-cover" />
+                       {/* 使用 img 标签最稳妥 */}
+                       <img 
+                         src={agentProfile?.avatar || `https://api.dicebear.com/9.x/initials/svg?seed=${p.agent_name}`} 
+                         alt={p.agent_name} 
+                         className="w-full h-full object-cover" 
+                       />
                     </div>
                     <div>
                       <h3 className="font-bold text-gray-200 text-sm">{p.agent_name}</h3>
-                      <span className="text-[10px] text-gray-500 uppercase tracking-wider block">{agentProfile?.role}</span>
+                      <span className="text-[10px] text-gray-500 uppercase tracking-wider block">{agentProfile?.role || 'Trader'}</span>
                     </div>
                   </div>
                   {idx === 0 && <span className="bg-yellow-500/20 text-yellow-400 text-[10px] px-2 py-0.5 rounded font-bold">LEADER</span>}
                 </div>
 
                 <div className="space-y-4">
-                  {/* 主要资产数据 */}
                   <div>
                     <div className="text-gray-500 text-xs uppercase mb-1">Net Liquidation Value</div>
                     <div className={`text-2xl font-mono font-bold ${isPos ? 'text-emerald-400' : 'text-rose-400'}`}>
@@ -83,18 +94,13 @@ export default async function Home() {
                     </div>
                   </div>
 
-                  {/* 详细数据 Grid */}
                   <div className="grid grid-cols-2 gap-2 pt-4 border-t border-gray-800/50">
                     <div className="bg-gray-900/50 p-2 rounded">
-                      <div className="flex items-center gap-1 text-[10px] text-gray-500 mb-1">
-                        <DollarSign className="w-3 h-3" /> CASH
-                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-gray-500 mb-1"><DollarSign className="w-3 h-3" /> CASH</div>
                       <div className="text-gray-300 font-mono text-sm">${Number(p.cash).toLocaleString()}</div>
                     </div>
                     <div className="bg-gray-900/50 p-2 rounded">
-                      <div className="flex items-center gap-1 text-[10px] text-gray-500 mb-1">
-                        <Briefcase className="w-3 h-3" /> POSITIONS
-                      </div>
+                      <div className="flex items-center gap-1 text-[10px] text-gray-500 mb-1"><Briefcase className="w-3 h-3" /> POSITIONS</div>
                       <div className="text-gray-300 font-mono text-xs truncate" title={activeHoldings.join(', ')}>
                         {activeHoldings.length > 0 ? activeHoldings.join(', ') : 'Empty'}
                       </div>
@@ -106,13 +112,12 @@ export default async function Home() {
           })}
         </div>
 
-        {/* --- 实时交易终端 (Live Terminal) --- */}
+        {/* --- 交易终端 --- */}
         <div className="bg-[#111] border border-gray-800 rounded-xl overflow-hidden">
           <div className="px-6 py-4 border-b border-gray-800 flex items-center gap-2 bg-gray-900/30">
             <Terminal className="w-4 h-4 text-gray-500" />
             <h2 className="text-sm font-bold text-gray-300 uppercase tracking-wider">Order Execution Log</h2>
           </div>
-          
           <div className="overflow-x-auto">
             <table className="w-full text-left text-xs font-mono">
               <thead className="bg-gray-900/50 text-gray-500">
@@ -128,35 +133,26 @@ export default async function Home() {
               <tbody className="divide-y divide-gray-800/50">
                 {logs.map((log) => (
                   <tr key={log.id} className="hover:bg-gray-900/40 transition-colors">
-                    <td className="px-6 py-3 text-gray-600 whitespace-nowrap">
-                      {new Date(log.created_at).toLocaleTimeString()}
-                    </td>
-                    <td className="px-6 py-3 font-bold text-gray-400">
-                      {log.agent_name}
-                    </td>
-                    <td className="px-6 py-3 text-blue-400 font-bold">
-                      {log.symbol}
-                    </td>
+                    <td className="px-6 py-3 text-gray-600 whitespace-nowrap">{new Date(log.created_at).toLocaleTimeString()}</td>
+                    <td className="px-6 py-3 font-bold text-gray-400">{log.agent_name}</td>
+                    <td className="px-6 py-3 text-blue-400 font-bold">{log.symbol}</td>
                     <td className="px-6 py-3">
                       <span className={`px-2 py-0.5 rounded ${
                         log.action === 'BUY' ? 'bg-emerald-900/30 text-emerald-500' : 
-                        log.action === 'SELL' ? 'bg-rose-900/30 text-rose-500' : 'text-gray-600'
+                        log.action === 'SELL' ? 'bg-rose-900/30 text-rose-500' : 
+                        log.action === 'FAIL' ? 'bg-red-900 text-white' : 'text-gray-600'
                       }`}>
                         {log.action}
                       </span>
                     </td>
-                    <td className="px-6 py-3 text-right text-gray-300">
-                      ${Number(log.price).toFixed(2)}
-                    </td>
-                    <td className="px-6 py-3 text-gray-500 truncate max-w-xs" title={log.reason}>
-                      {log.reason}
-                    </td>
+                    <td className="px-6 py-3 text-right text-gray-300">${Number(log.price).toFixed(2)}</td>
+                    <td className="px-6 py-3 text-gray-500 truncate max-w-xs" title={log.reason}>{log.reason}</td>
                   </tr>
                 ))}
                 {logs.length === 0 && (
                   <tr>
                     <td colSpan={6} className="px-6 py-12 text-center text-gray-600 italic">
-                      System initializing... Waiting for market data.
+                      System standby. Click "FORCE TRIGGER" to start trading.
                     </td>
                   </tr>
                 )}
